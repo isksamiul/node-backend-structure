@@ -1,5 +1,5 @@
 {
-    "name": "node-rest-api-boilerplate",
+    "name": "node-backend-structure",
     "version": "1.0.0",
     "description": "Production-ready Node.js REST API boilerplate with MongoDB/MySQL support, JWT authentication, user management, and analytics tracking",
     "main": "app.js",

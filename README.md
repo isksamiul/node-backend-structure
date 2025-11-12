@@ -1,340 +1,215 @@
-# Node.js REST API Boilerplate
+# Node Backend Structure
 
-[![npm version](https://img.shields.io/npm/v/node-project.svg)](https://www.npmjs.com/package/node-project)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+Production‑ready Node.js REST API boilerplate with MongoDB/MySQL support, JWT authentication, input validation, file uploads, and clean module structure.
 
-A production-ready Node.js REST API boilerplate with MongoDB/MySQL support, JWT authentication, user management, file uploads, and analytics tracking. Built with Express.js and following best practices for scalable backend applications.
+This package helps you bootstrap secure REST APIs fast. It includes user registration/login, protected routes, profile picture upload, and common utilities like JWT, password hashing, and standardized API responses.
 
-## ✨ Features
+## Features
 
-- 🔐 **JWT Authentication** - Secure registration and login with token-based auth
-- 👤 **User Management** - Complete CRUD operations with profile picture uploads
-- 📊 **Analytics Tracking** - Built-in event tracking and user metrics
-- 🗄️ **Multi-Database Support** - MongoDB, MySQL, or both simultaneously
-- 🔒 **Password Security** - Bcrypt hashing with configurable salt rounds
-- ✅ **Request Validation** - Joi schema validation for all endpoints
-- 📁 **File Upload** - Multer integration for profile pictures and documents
-- 🐳 **Docker Ready** - Includes Dockerfile and docker-compose.yml
-- 🔄 **Redis Support** - Optional Redis integration for caching
-- 📝 **Standardized Responses** - Consistent API response format
-- 🛡️ **Protected Routes** - Middleware-based authentication
-- 🔍 **Search & Pagination** - Built-in search and pagination support
+- **Express** server with structured routes/controllers
+- **MongoDB (Mongoose)** first, optional **MySQL (Sequelize)** wiring
+- **JWT** authentication middleware (Bearer token)
+- **Input validation** using Joi (with @joi/date)
+- **Multer** file uploads to local storage
+- **Standardized responses** via `responseLib`
+- **Environment-based config** with `.env`
+- **Ready scripts** for dev and prod
 
-## 📋 Prerequisites
-
-- **Node.js** >= 14.x
-- **MongoDB** >= 4.4 (if using MongoDB)
-- **MySQL** >= 5.7 (if using MySQL)
-- **Redis** (optional, for caching)
-
-## 🚀 Quick Start
-
-### Installation
+## Installation
 
 ```bash
-npm install node-project
+# using npm
+npm install node-backend-structure
+
+# or add to an existing project
+npm i node-backend-structure
 ```
 
-### Basic Setup
+If you're using this repository directly (recommended for starting a new service):
 
-1. **Create environment file:**
+```bash
+git clone <your-repo-url>
+npm install
+```
+
+## Quick Start
+
+1) Copy environment template and configure values
 
 ```bash
 cp .env.example .env
 ```
 
-2. **Configure your `.env` file:**
+Key variables:
 
-```env
-NODE_ENV=development
-REST_PORT=3000
-DB_TYPE=mongo
-DB_URI=mongodb://localhost:27017/myapp
-JWT_SECRET=your-super-secret-jwt-key-change-this
-JWT_EXPIRES_IN=7d
-```
+- `NODE_ENV=development`
+- `REST_PORT=3000`
+- `DB_TYPE=mongo`  (options: `mongo`, `mysql`, `multi`)
+- `MDB_URI=your-mongodb-uri`
+- `JWT_SECRET=your-super-secret-jwt-key-change-this-in-production`
+- `JWT_EXPIRES_IN=7d`
+- `REDIS_URL=redis://localhost:6379` (optional)
 
-3. **Start the server:**
+2) Start the server
 
 ```bash
-# Development mode with auto-reload
+# development (w/ reload)
 npm run dev
 
-# Production mode
+# production
 npm start
 ```
 
-The API will be available at `http://localhost:3000`
+By default the API will listen on `http://localhost:3000` and expose routes under `/api/v1`.
 
-## 📚 API Documentation
+> Note: The `config/appConfig.js` exposes `apiVersion='/api/v1'` and `local_storage_path='./uploads'`.
 
-### Authentication Endpoints
+## API Endpoints
 
-#### Register User
-```http
-POST /api/v1/users/register
-Content-Type: application/json
+Base URL: `/api/v1`
 
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "mobile": "1234567890",
-  "password": "SecurePass123"
-}
+- **POST** `/register` — Create user
+  - Body: `{ name, email, mobile(10 digits), password(min 6) }`
+  - Validated via Joi; returns JWT token and user profile
+
+- **POST** `/login` — Authenticate user
+  - Body: `{ email, password }`
+  - Returns JWT token and user profile
+
+- **GET** `/users` — List users (protected)
+  - Headers: `Authorization: Bearer <token>`
+  - Query: `search` (optional; matches name/email/mobile)
+
+- **POST** `/upload-profile-picture` — Upload profile image (protected)
+  - Headers: `Authorization: Bearer <token>`
+  - Form-Data: `profilePicture` (file)
+  - Stores file in `./uploads` and returns full URL
+
+### Example Requests
+
+Register:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/register \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "mobile": "9876543210",
+    "password": "secret123"
+  }'
 ```
 
-**Response:**
-```json
-{
-  "err": false,
-  "message": "User registered successfully",
-  "data": {
-    "userId": "507f1f77bcf86cd799439011",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "mobile": "1234567890",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-  }
-}
+Login:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "jane@example.com",
+    "password": "secret123"
+  }'
 ```
 
-#### Login User
-```http
-POST /api/v1/users/login
-Content-Type: application/json
+List users:
 
-{
-  "email": "john@example.com",
-  "password": "SecurePass123"
-}
+```bash
+curl -H 'Authorization: Bearer <JWT_TOKEN>' \
+  'http://localhost:3000/api/v1/users?search=jane'
 ```
 
-### User Management (Protected)
+Upload profile picture:
 
-#### List Users
-```http
-GET /api/v1/users?search=john&page=1&limit=10
-Authorization: Bearer <your-jwt-token>
+```bash
+curl -X POST http://localhost:3000/api/v1/upload-profile-picture \
+  -H 'Authorization: Bearer <JWT_TOKEN>' \
+  -F 'profilePicture=@/path/to/image.png'
 ```
 
-#### Upload Profile Picture
-```http
-POST /api/v1/users/upload-profile
-Authorization: Bearer <your-jwt-token>
-Content-Type: multipart/form-data
+## Validation Rules
 
-profilePicture: <file>
-```
+- Registration:
+  - `name`: string 2–100
+  - `email`: valid email
+  - `mobile`: exactly 10 digits
+  - `password`: min 6 chars
+- Login:
+  - `email` and `password` required
 
-### Analytics Endpoints
+Errors are returned as standardized objects from `responseLib`.
 
-#### Track Event
-```http
-POST /api/v1/analytics/track
-Content-Type: application/json
+## Authentication
 
-{
-  "event_name": "PAGE_VIEW",
-  "category": "Navigation",
-  "description": "User viewed homepage",
-  "parameters": {
-    "page": "/home",
-    "user_id": "123"
-  }
-}
-```
+- Send `Authorization: Bearer <token>` for protected routes
+- Tokens are signed with `JWT_SECRET` and expire based on `JWT_EXPIRES_IN`
 
-#### Get Event Counts
-```http
-GET /api/v1/analytics/event-counts?startDate=2025-01-01&endDate=2025-01-31&event=ALL
-```
+## File Uploads
 
-#### Get Active Users
-```http
-GET /api/v1/analytics/active-users?type=daily
-```
+- Uses Multer with disk storage
+- Allowed types: jpeg, jpg, png, gif, webp
+- Max size: 5 MB
+- Field name: `profilePicture`
+- Files saved under `./uploads` (auto-created)
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
-node-project/
-├── app.js                      # Application entry point
-├── package.json                # Dependencies and scripts
-├── .env.example                # Environment variables template
-├── Dockerfile                  # Docker configuration
-├── docker-compose.yml          # Docker Compose setup
+.
 ├── config/
-│   ├── db.js                   # Database connection handler
-│   └── appConfig.js            # Application configuration
+│   ├── appConfig.js          # apiVersion, uploads base path
+│   └── db.js                 # DB bootstrap for Mongo/MySQL
 ├── src/
 │   ├── controllers/
-│   │   └── userController.js   # User business logic
+│   │   └── userController.js
+│   ├── libs/                 # jwtLib, passwordLib, responseLib, etc.
+│   ├── middlewares/          # auth, validator, fileUpload
 │   ├── models/
-│   │   └── userModel.js        # Database schemas
-│   ├── routes/
-│   │   └── userRouter.js       # API route definitions
-│   ├── middlewares/
-│   │   ├── auth.js             # JWT authentication
-│   │   ├── validator.js        # Request validation
-│   │   └── fileUpload.js       # File upload handling
-│   └── libs/
-│       ├── jwtLib.js           # JWT utilities
-│       ├── passwordLib.js      # Password hashing
-│       ├── responseLib.js      # Response formatter
-│       └── encLib.js           # Encryption utilities
-├── uploads/                    # File upload directory
-└── views/
-    └── index.html              # API documentation page
+│   │   └── userModel.js
+│   └── routes/
+│       └── userRouter.js
+├── uploads/                  # local file storage
+├── .env.example
+├── package.json
+└── README.md
 ```
 
-## ⚙️ Configuration
+## Scripts
 
-### Environment Variables
+- `npm run dev` — start with nodemon
+- `npm start` — start in production
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment (development/production) | `development` |
-| `REST_PORT` | Server port | `3000` |
-| `DB_TYPE` | Database type (mongo/mysql/multi) | `mongo` |
-| `DB_URI` | MongoDB connection string | - |
-| `JWT_SECRET` | Secret key for JWT signing | - |
-| `JWT_EXPIRES_IN` | Token expiration time | `7d` |
-| `REDIS_URL` | Redis connection URL (optional) | - |
+## Configuration Notes
 
-### Database Configuration
+- MongoDB connection is taken from `MDB_URI`. Alternatively, set the individual parts (`MDB_HOST`, `MDB_PORT`, `MDB_NAME`, `MDB_USER`, `MDB_PASS`).
+- `DB_TYPE` controls which databases to start: `mongo`, `mysql`, or `multi` to run both.
+- Redis is optional and currently disabled by default in `config/db.js`.
 
-**MongoDB:**
-```env
-DB_TYPE=mongo
-DB_URI=mongodb://localhost:27017/myapp
-```
+## Using As a Boilerplate
 
-**MySQL:**
-```env
-DB_TYPE=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=myapp
-DB_USER=root
-DB_PASS=password
-```
+If you installed via npm but want to customize, you’ll typically clone or copy this repository, then:
 
-**Multi-Database:**
-```env
-DB_TYPE=multi
-# Configure both MongoDB and MySQL variables
-```
+- Replace the `author`, `repository`, and `homepage` fields in `package.json`
+- Update the service name and `name` field for npm publishing uniqueness
+- Add your own routes/models/controllers
 
-## 🐳 Docker Deployment
+## Publishing to npm
 
-### Using Docker Compose
+1) Ensure `package.json` has a unique `name`, valid `version`, `license`, and `repository`.
+2) Add a `.npmignore` to exclude dev files (already provided here).
+3) Login and publish:
 
 ```bash
-# Start all services (app + MongoDB)
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
+npm login
+npm publish --access public
 ```
 
-### Using Docker
+> Tip: The `main` field currently points to `app.js`. Ensure your entry file exists and exports/starts your server as needed before publishing.
 
-```bash
-# Build image
-docker build -t node-project .
-
-# Run container
-docker run -p 3000:3000 --env-file .env node-project
-```
-
-## 🔒 Security Features
-
-- **Password Hashing**: Bcrypt with 10 salt rounds
-- **JWT Tokens**: Secure token-based authentication
-- **Input Validation**: Joi schema validation on all inputs
-- **Protected Routes**: Middleware-based route protection
-- **CORS Support**: Configurable CORS policies
-- **Environment Variables**: Sensitive data in .env files
-
-## 📦 Dependencies
-
-### Core Dependencies
-- `express` - Web framework
-- `mongoose` - MongoDB ODM
-- `sequelize` - MySQL ORM
-- `jsonwebtoken` - JWT implementation
-- `bcrypt` - Password hashing
-- `joi` - Schema validation
-- `multer` - File upload handling
-- `dotenv` - Environment configuration
-
-### Optional Dependencies
-- `redis` - Caching layer
-- `axios` - HTTP client
-- `moment-timezone` - Date/time handling
-
-## 🧪 Response Format
-
-All API responses follow a consistent format:
-
-**Success Response:**
-```json
-{
-  "err": false,
-  "message": "Operation successful",
-  "data": { ... }
-}
-```
-
-**Error Response:**
-```json
-{
-  "err": true,
-  "message": "Error description",
-  "data": null
-}
-```
-
-## 🛠️ Development
-
-### Scripts
-
-```bash
-# Start development server with auto-reload
-npm run dev
-
-# Start production server
-npm start
-```
-
-### Adding New Routes
-
-1. Create controller in `src/controllers/`
-2. Create model in `src/models/`
-3. Define routes in `src/routes/`
-4. Add validation in `src/middlewares/validator.js`
-
-## 📄 License
+## License
 
 ISC
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Support
-
-For issues and questions, please open an issue on the GitHub repository.
-
-## 🔗 Links
-
-- [npm Package](https://www.npmjs.com/package/node-project)
-- [GitHub Repository](https://github.com/yourusername/node-project)
-- [Documentation](https://github.com/yourusername/node-project#readme)
-
 ---
 
-**Made with ❤️ for the Node.js community**
+Questions or need help? Open an issue in your repository or start a discussion.
+
