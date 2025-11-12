@@ -28,7 +28,7 @@ npm i node-backend-structure
 If you're using this repository directly (recommended for starting a new service):
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/isksamiul/node-backend-structure.git
 npm install
 ```
 
