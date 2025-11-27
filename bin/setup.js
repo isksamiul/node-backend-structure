@@ -67,11 +67,18 @@ console.log('🚀 Initializing project from node-backend-structure...');
 
 try {
     copyDir(sourceDir, targetDir);
+
+    // Create uploads directory explicitly
+    const uploadsDir = path.join(targetDir, 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir);
+    }
+
     console.log('\n✅ Project structure created successfully!');
     console.log('\nNext steps:');
     console.log('1. npm install');
     console.log('2. cp .env.example .env');
-    console.log('3. npm start');
+    console.log('3. npm run dev');
 } catch (error) {
     console.error('❌ Error initializing project:', error);
     process.exit(1);

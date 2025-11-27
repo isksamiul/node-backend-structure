@@ -1,223 +1,159 @@
-# Node Backend Structure
+# 🚀 Node.js Backend Structure
 
-Production‑ready Node.js REST API boilerplate with MongoDB/MySQL support, JWT authentication, input validation, file uploads, and clean module structure.
+> **The Ultimate Production-Ready Boilerplate for Modern Web Development**
 
-This package helps you bootstrap secure REST APIs fast. It includes user registration/login, protected routes, profile picture upload, and common utilities like JWT, password hashing, and standardized API responses.
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/isksamiul/node-backend-structure/graphs/commit-activity)
 
-## Features
+Stop wasting time setting up the same foundation for every project. **Node Backend Structure** provides a robust, scalable, and secure starting point for your next big idea. Whether you're building a startup MVP, a corporate API, or a personal project, this boilerplate handles the boring stuff so you can focus on what matters: **your business logic**.
 
-- **Express** server with structured routes/controllers
-- **MongoDB (Mongoose)** first, optional **MySQL (Sequelize)** wiring
-- **JWT** authentication middleware (Bearer token)
-- **Input validation** using Joi (with @joi/date)
-- **Multer** file uploads to local storage
-- **Standardized responses** via `responseLib`
-- **Environment-based config** with `.env`
-- **Ready scripts** for dev and prod
+---
 
-## Installation
+## 🌟 Why Use This Boilerplate?
 
-To create a new project using this boilerplate, simply run:
+In the modern development landscape, speed and security are paramount. Starting from scratch is error-prone and time-consuming.
+
+*   **⚡ Save 10+ Hours of Setup:** Authentication, Database connections, File uploads, and Validation are already done.
+*   **🛡️ Enterprise-Grade Security:** Built-in JWT authentication, password hashing (Bcrypt), and input validation (Joi) ensure your data is safe.
+*   **📈 Scalable Architecture:** Designed with a clean MVC (Model-View-Controller) pattern that grows with your application.
+*   **🔌 Database Agnostic:** Native support for **MongoDB** (Mongoose) and **MySQL** (Sequelize). Switch or use both!
+*   **🛠️ Developer Experience:** Hot-reloading, environment configuration, and standardized error handling make coding a breeze.
+
+---
+
+## 🚀 Quick Start
+
+Get your project running in seconds with a single command.
+
+### 1. Create Your Project
+Run this command in your terminal. No need to clone or download zip files manually!
 
 ```bash
 npx node-backend-structure
 ```
 
-This will download the complete project structure into your current directory.
+This will magically scaffold the entire project structure in your current directory.
 
-After the setup is complete:
-
+### 2. Install Dependencies
 ```bash
-# Install dependencies
 npm install
-
-# Setup environment variables
-cp .env.example .env
-
-# Start the server
-npm run dev
 ```
 
-## Quick Start
-
-1) Copy environment template and configure values
-
+### 3. Start Coding
 ```bash
-cp .env.example .env
+npm run start
 ```
-
-Key variables:
-
-- `NODE_ENV=development`
-- `REST_PORT=3000`
-- `DB_TYPE=mongo`  (options: `mongo`, `mysql`, `multi`)
-- `MDB_URI=your-mongodb-uri`
-- `JWT_SECRET=your-super-secret-jwt-key-change-this-in-production`
-- `JWT_EXPIRES_IN=7d`
-- `REDIS_URL=redis://localhost:6379` (optional)
-
-2) Start the server
-
-```bash
-# development (w/ reload)
-npm run dev
-
-# production
-npm start
-```
-
-By default the API will listen on `http://localhost:3000` and expose routes under `/api/v1`.
-
-> Note: The `config/appConfig.js` exposes `apiVersion='/api/v1'` and `local_storage_path='./uploads'`.
-
-## API Endpoints
-
-Base URL: `/api/v1`
-
-- **POST** `/register` — Create user
-  - Body: `{ name, email, mobile(10 digits), password(min 6) }`
-  - Validated via Joi; returns JWT token and user profile
-
-- **POST** `/login` — Authenticate user
-  - Body: `{ email, password }`
-  - Returns JWT token and user profile
-
-- **GET** `/users` — List users (protected)
-  - Headers: `Authorization: Bearer <token>`
-  - Query: `search` (optional; matches name/email/mobile)
-
-- **POST** `/upload-profile-picture` — Upload profile image (protected)
-  - Headers: `Authorization: Bearer <token>`
-  - Form-Data: `profilePicture` (file)
-  - Stores file in `./uploads` and returns full URL
-
-### Example Requests
-
-Register:
-
-```bash
-curl -X POST http://localhost:3000/api/v1/register \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "mobile": "9876543210",
-    "password": "secret123"
-  }'
-```
-
-Login:
-
-```bash
-curl -X POST http://localhost:3000/api/v1/login \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "email": "jane@example.com",
-    "password": "secret123"
-  }'
-```
-
-List users:
-
-```bash
-curl -H 'Authorization: Bearer <JWT_TOKEN>' \
-  'http://localhost:3000/api/v1/users?search=jane'
-```
-
-Upload profile picture:
-
-```bash
-curl -X POST http://localhost:3000/api/v1/upload-profile-picture \
-  -H 'Authorization: Bearer <JWT_TOKEN>' \
-  -F 'profilePicture=@/path/to/image.png'
-```
-
-## Validation Rules
-
-- Registration:
-  - `name`: string 2–100
-  - `email`: valid email
-  - `mobile`: exactly 10 digits
-  - `password`: min 6 chars
-- Login:
-  - `email` and `password` required
-
-Errors are returned as standardized objects from `responseLib`.
-
-## Authentication
-
-- Send `Authorization: Bearer <token>` for protected routes
-- Tokens are signed with `JWT_SECRET` and expire based on `JWT_EXPIRES_IN`
-
-## File Uploads
-
-- Uses Multer with disk storage
-- Allowed types: jpeg, jpg, png, gif, webp
-- Max size: 5 MB
-- Field name: `profilePicture`
-- Files saved under `./uploads` (auto-created)
-
-## Project Structure
-
-```
-.
-├── config/
-│   ├── appConfig.js          # apiVersion, uploads base path
-│   └── db.js                 # DB bootstrap for Mongo/MySQL
-├── src/
-│   ├── controllers/
-│   │   └── userController.js
-│   ├── libs/                 # jwtLib, passwordLib, responseLib, etc.
-│   ├── middlewares/          # auth, validator, fileUpload
-│   ├── models/
-│   │   └── userModel.js
-│   └── routes/
-│       └── userRouter.js
-├── uploads/                  # local file storage
-├── .env.example
-├── package.json
-└── README.md
-```
-
-## Scripts
-
-- `npm run dev` — start with nodemon
-- `npm start` — start in production
-
-## Configuration Notes
-
-- MongoDB connection is taken from `MDB_URI`. Alternatively, set the individual parts (`MDB_HOST`, `MDB_PORT`, `MDB_NAME`, `MDB_USER`, `MDB_PASS`).
-- `DB_TYPE` controls which databases to start: `mongo`, `mysql`, or `multi` to run both.
-- Redis is optional and currently disabled by default in `config/db.js`.
-
-## Customization
-
-After running `npx node-backend-structure`, you will have a fresh project ready for customization.
-The setup script automatically:
-- Removes the CLI configuration
-- Resets the package name to `my-backend-app`
-- Resets the version to `1.0.0`
-
-You can now update `package.json` with your own project details and start building your API.
-
-## Publishing to npm
-
-1) Ensure `package.json` has a unique `name`, valid `version`, `license`, and `repository`.
-2) Add a `.npmignore` to exclude dev files (already provided here).
-3) Login and publish:
-
-```bash
-npm login
-npm publish --access public
-```
-
-> Tip: The `main` field currently points to `app.js`. Ensure your entry file exists and exports/starts your server as needed before publishing.
-
-## License
-
-ISC
+Your server is now running at `http://localhost:3000`! 
 
 ---
 
-Questions or need help? Open an issue in your repository or start a discussion.
+## ✨ Key Features
 
+*   **🔐 Authentication:** Complete user registration and login flow with JWT Bearer tokens.
+*   **📝 Input Validation:** Request data validation using `Joi` to prevent bad data from reaching your controllers.
+*   **📂 File Uploads:** Integrated `Multer` support for handling profile pictures and file uploads locally.
+*   **🗄️ Multi-Database Support:** 
+    *   **MongoDB** (Mongoose) for flexible schema-less data.
+    *   **MySQL** (Sequelize) for structured relational data.
+*   **📡 Standardized API Responses:** Consistent success and error response structures across the entire app.
+*   **⚙️ Environment Management:** Easy configuration using `.env` files.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Runtime:** Node.js
+*   **Framework:** Express.js
+*   **Databases:** MongoDB (Mongoose), MySQL (Sequelize)
+*   **Authentication:** JWT (JSON Web Tokens), Bcrypt
+*   **Validation:** Joi
+*   **File Handling:** Multer
+*   **Utilities:** Axios, Moment-timezone, Dotenv
+
+---
+
+## 📂 Project Structure
+
+A clean structure that makes sense.
+
+```
+.
+├── config/               # Database and App configuration
+│   ├── appConfig.js
+│   └── db.js
+├── src/
+│   ├── controllers/      # Request handlers (Business logic)
+│   │   └── userController.js
+│   ├── libs/             # Reusable libraries
+│   │   ├── encLib.js
+│   │   ├── jwtLib.js
+│   │   ├── passwordLib.js
+│   │   ├── responseLib.js
+│   │   └── rsaKeyLib.js
+│   ├── middlewares/      # Express middlewares
+│   │   ├── auth.js
+│   │   ├── fileUpload.js
+│   │   └── validator.js
+│   ├── models/           # Database models
+│   │   └── userModel.js
+│   └── routes/           # API route definitions
+│       └── userRouter.js
+├── views/
+│   └── index.html
+├── uploads/              # Storage for uploaded files
+├── .env.example          # Environment variable template
+├── .gitignore
+├── app.js                # App entry point
+└── package.json          # Dependencies and scripts
+```
+
+## ⚙️ Configure Environment
+
+1.  **Copy the example file:**
+    ```bash
+    cp .env.example .env
+    ```
+
+2.  **Edit `.env`:**
+    Open the `.env` file and update the following variables:
+    *   `MDB_URI`: Your MongoDB connection string.
+    *   `JWT_SECRET`: A strong secret key for signing tokens.
+    *   `REST_PORT`: Port to run the server (default: 3000).
+
+---
+
+## 📖 API Documentation
+
+The boilerplate comes with pre-built endpoints to get you started:
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/register` | Register a new user | ❌ |
+| `POST` | `/api/v1/login` | Login and get JWT token | ❌ |
+| `GET` | `/api/v1/users` | Get list of users | ✅ |
+| `POST` | `/api/v1/upload-profile-picture` | Upload user avatar | ✅ |
+
+---
+
+## 🤝 Contributing
+
+Open source is at the heart of this project. We welcome contributions from everyone!
+
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/amazing-feature`).
+3.  Commit your changes (`git commit -m 'Add some amazing feature'`).
+4.  Push to the branch (`git push origin feature/amazing-feature`).
+5.  Open a Pull Request.
+
+---
+
+<!-- ## 📄 License
+
+This project is licensed under the **ISC License** - see the LICENSE file for details.
+
+--- -->
+
+<p align="center">
+  Made with ❤️ for the developer community.
+</p>
