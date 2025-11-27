@@ -1,8 +1,11 @@
 {
     "name": "node-backend-structure",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Production-ready Node.js REST API boilerplate with MongoDB/MySQL support, JWT authentication, user management, and analytics tracking",
     "main": "app.js",
+    "bin": {
+        "node-backend-structure": "./bin/setup.js"
+    },
     "scripts": {
         "start": "node app.js",
         "dev": "nodemon app.js",

@@ -17,19 +17,25 @@ This package helps you bootstrap secure REST APIs fast. It includes user registr
 
 ## Installation
 
-```bash
-# using npm
-npm install node-backend-structure
+To create a new project using this boilerplate, simply run:
 
-# or add to an existing project
-npm i node-backend-structure
+```bash
+npx node-backend-structure
 ```
 
-If you're using this repository directly (recommended for starting a new service):
+This will download the complete project structure into your current directory.
+
+After the setup is complete:
 
 ```bash
-git clone https://github.com/isksamiul/node-backend-structure.git
+# Install dependencies
 npm install
+
+# Setup environment variables
+cp .env.example .env
+
+# Start the server
+npm run dev
 ```
 
 ## Quick Start
@@ -184,13 +190,15 @@ Errors are returned as standardized objects from `responseLib`.
 - `DB_TYPE` controls which databases to start: `mongo`, `mysql`, or `multi` to run both.
 - Redis is optional and currently disabled by default in `config/db.js`.
 
-## Using As a Boilerplate
+## Customization
 
-If you installed via npm but want to customize, you’ll typically clone or copy this repository, then:
+After running `npx node-backend-structure`, you will have a fresh project ready for customization.
+The setup script automatically:
+- Removes the CLI configuration
+- Resets the package name to `my-backend-app`
+- Resets the version to `1.0.0`
 
-- Replace the `author`, `repository`, and `homepage` fields in `package.json`
-- Update the service name and `name` field for npm publishing uniqueness
-- Add your own routes/models/controllers
+You can now update `package.json` with your own project details and start building your API.
 
 ## Publishing to npm
 
