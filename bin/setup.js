@@ -77,8 +77,7 @@ try {
     console.log('\n✅ Project structure created successfully!');
     console.log('\nNext steps:');
     console.log('1. npm install');
-    console.log('2. cp .env.example .env');
-    console.log('3. npm run dev');
+    console.log('2. npm start');
 } catch (error) {
     console.error('❌ Error initializing project:', error);
     process.exit(1);
